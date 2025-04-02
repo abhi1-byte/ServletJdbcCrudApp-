@@ -4,6 +4,7 @@ import com.example.dto.Student;
 import com.example.service.IStudentService;
 import com.example.servicefactory.StudentServiceFactory;
 
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -20,7 +21,7 @@ public class MyServlet extends HttpServlet {
         processRequest(request, response);
     }
 
-    private void processRequest(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    private void processRequest(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         System.out.println("Request URI: " + request.getRequestURI());
         System.out.println("Request Path: " + request.getPathInfo());
         IStudentService studentService = StudentServiceFactory.getStudentService();
@@ -31,10 +32,13 @@ public class MyServlet extends HttpServlet {
             s.setSname(request.getParameter("sname"));
             s.setSaddress(request.getParameter("saddress"));
             int status = studentService.addStudent(s);
-            if (status >= 1)
-                out.println("<h1 style='color:green; text-align:center;'>Inserted Successfully...</h1>");
-            else {
-                out.println("<h1 style='color:red; text-align:center;'>Inserted Failed...</h1>");
+            RequestDispatcher rd = null;
+            if (status >= 1) {
+                rd = request.getRequestDispatcher("/success.html");
+                rd.forward(request, response);
+            } else {
+                rd = request.getRequestDispatcher("/failure.html");
+                rd.forward(request, response);
             }
             out.close();
         }
@@ -56,12 +60,16 @@ public class MyServlet extends HttpServlet {
             PrintWriter out = response.getWriter();
             Integer sid = (Integer.parseInt(request.getParameter("sid")));
             int status = studentService.deleteStudent(sid);
+            RequestDispatcher rd = null;
             if (status == 1) {
-                out.println("<h1 style='color:green; text-align:center;'>Deleted Successfully...</h1>");
+                rd = request.getRequestDispatcher("/deletesuccess.html");
+                rd.forward(request, response);
             } else if (status == -1) {
-                out.println("<h1 style='color:red; text-align:center;'>Deletion Failed as some exception occurred...</h1>");
+                rd = request.getRequestDispatcher("/deletefailure.html");
+                rd.forward(request, response);
             } else if (status == 0) {
-                out.println("<h1 style='color:red; text-align:center;'>Given ID isn't available...</h1>");
+                rd = request.getRequestDispatcher("/deletenotfound.html");
+                rd.forward(request, response);
             }
             out.close();
         }
@@ -106,16 +114,23 @@ public class MyServlet extends HttpServlet {
             s.setSname(request.getParameter("sname"));
             s.setSaddress(request.getParameter("saddress"));
             int status = studentService.updateStudent(s);
+            RequestDispatcher rd = null;
             if (status == 1) {
-                out.println("<h1 style='color:green; text-align:center;'>Updated Successfully...</h1>");
+                rd = request.getRequestDispatcher("/updationsuccess.html");
+                rd.forward(request, response);
             } else if (status == -1) {
-                out.println("<h1 style='color:red; text-align:center;'>Updation Failed as some exception occurred...</h1>");
+                rd = request.getRequestDispatcher("/updationfailure.html");
+                rd.forward(request, response);
             }
             out.close();
         }
     }
 
-    public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        processRequest(request, response);
+    public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException{
+        try {
+            processRequest(request, response);
+        } catch (ServletException e) {
+            e.printStackTrace();
+        }
     }
 }
