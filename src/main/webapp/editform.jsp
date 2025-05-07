@@ -11,9 +11,10 @@
             <table align="center">
                 <tr>
                     <th>ID</th>
-                    <td>${student.sid}</td>
+                    <td>
+                        <input type="text" readonly="readonly" name='sid' value='${student.sid }'/>
+                    </td>
                 </tr>
-                <input type='hidden' name='sid' value='${student.sid}'/>
                 <tr>
                     <th>NAME</th>
                     <td>
